@@ -4,11 +4,17 @@ const multer = require('multer');
 const path = require('path');
 const app = express();
 
-// In-memory storage (resets on restart)
-let users = []; // { username, password }
-let posts = []; // { id, username, content, video, comments }
+let users = [];
+let posts = [
+  {
+    id: 0,
+    username: "testuser",
+    content: "This is a test post!",
+    video: null,
+    comments: [{ username: "testuser", text: "Cool post!" }]
+  }
+];
 
-// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use(session({
@@ -18,17 +24,27 @@ app.use(session({
 }));
 app.set('view engine', 'ejs');
 
-// Multer setup for video uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'public/uploads'),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
 const upload = multer({ storage });
 
-// Routes
 app.get('/', (req, res) => {
+  console.log('Rendering homepage', { posts, user: req.session.user });
   res.render('index', { posts, user: req.session.user });
 });
+
+app.get('/lectures', (req, res) => {
+  res.send('Lectures page coming soon! <a href="/">Back</a>');
+});
+
+app.get('/dashboard', (req, res) => {
+  if (!req.session.user) return res.redirect('/login');
+  res.send(`Dashboard for ${req.session.user}! <a href="/">Back</a>`);
+});
+
+// Existing routes (login, signup, post, etc.) remain unchanged...
 
 app.get('/login', (req, res) => {
   res.render('login');

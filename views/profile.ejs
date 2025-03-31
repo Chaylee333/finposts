@@ -5,6 +5,18 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <nav class="top-menu">
+    <div class="menu-left">
+      <a href="/" class="logo">Social Video App</a>
+      <a href="/">Home</a>
+      <a href="/lectures">Lectures</a>
+      <a href="/dashboard">Dashboard</a>
+    </div>
+    <div class="menu-right">
+      <a href="/login">Login</a>
+      <a href="/signup">Sign Up</a>
+    </div>
+  </nav>
   <h1><%= profileUser %>'s Profile</h1>
   <h2>Posts</h2>
   <% userPosts.forEach(post => { %>

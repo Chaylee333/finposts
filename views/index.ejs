@@ -1,57 +1,61 @@
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Social Video App</title>
-      <link rel="stylesheet" href="/style.css">
-    </head>
-    <body>
-      <nav>
-        <div>
-          <h1>Social Video App</h1>
-        </div>
-        <div>
-          <% if (user) { %>
-            <p>Welcome, <a href="/profile/<%= user %>"><%= user %></a>! 
-              <a href="/post">Create Post</a> | 
-              <a href="/logout">Logout</a></p>
-          <% } else { %>
-            <p><a href="/login">Login</a> | <a href="/signup">Sign Up</a></p>
-          <% } %>
-        </div>
-      </nav>
-
-      <div class="container">
-        <h2>Posts</h2>
-        <% posts.forEach(post => { %>
-          <div class="post">
-            <div class="votes">
-              <span>↑</span>
-              <span><%= post.comments.length %></span> <!-- Placeholder for votes -->
-              <span>↓</span>
-            </div>
-            <div class="content">
-              <p class="username"><a href="/profile/<%= post.username %>"><%= post.username %></a></p>
-              <p><%= post.content %></p>
-              <% if (post.video) { %>
-                <video controls src="<%= post.video %>" width="300"></video>
-              <% } %>
-              <div class="comments">
-                <h3>Comments</h3>
-                <% post.comments.forEach(comment => { %>
-                  <div class="comment">
-                    <span class="username"><%= comment.username %></span>: <%= comment.text %>
-                  </div>
-                <% }) %>
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Social Video App</title>
+            <link rel="stylesheet" href="/style.css">
+          </head>
+          <body>
+            <nav class="top-menu">
+              <div class="menu-left">
+                <a href="/" class="logo">Social Video App</a>
+                <a href="/">Home</a>
+                <a href="/lectures">Lectures</a>
+                <a href="/dashboard">Dashboard</a>
+              </div>
+              <div class="menu-right">
                 <% if (user) { %>
-                  <form action="/comment/<%= post.id %>" method="POST">
-                    <input type="text" name="comment" placeholder="Add a comment" required>
-                    <button type="submit">Comment</button>
-                  </form>
+                  <span>Welcome, <a href="/profile/<%= user %>"><%= user %></a></span>
+                  <a href="/post">Create Post</a>
+                  <a href="/logout">Logout</a>
+                <% } else { %>
+                  <a href="/login">Login</a>
+                  <a href="/signup">Sign Up</a>
                 <% } %>
               </div>
+            </nav>
+
+            <div class="container">
+              <h2>Posts</h2>
+              <% posts.forEach(post => { %>
+                <div class="post">
+                  <div class="votes">
+                    <span>↑</span>
+                    <span><%= post.comments.length %></span>
+                    <span>↓</span>
+                  </div>
+                  <div class="content">
+                    <p class="username"><a href="/profile/<%= post.username %>"><%= post.username %></a></p>
+                    <p><%= post.content %></p>
+                    <% if (post.video) { %>
+                      <video controls src="<%= post.video %>" width="300"></video>
+                    <% } %>
+                    <div class="comments">
+                      <h3>Comments</h3>
+                      <% post.comments.forEach(comment => { %>
+                        <div class="comment">
+                          <span class="username"><%= comment.username %></span>: <%= comment.text %>
+                        </div>
+                      <% }) %>
+                      <% if (user) { %>
+                        <form action="/comment/<%= post.id %>" method="POST">
+                          <input type="text" name="comment" placeholder="Add a comment" required>
+                          <button type="submit">Comment</button>
+                        </form>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
             </div>
-          </div>
-        <% }) %>
-      </div>
-    </body>
-    </html>
+          </body>
+          </html>
