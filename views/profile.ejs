@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= profileUser %>'s Profile</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1><%= profileUser %>'s Profile</h1>
+  <h2>Posts</h2>
+  <% userPosts.forEach(post => { %>
+    <div class="post">
+      <p><%= post.content %></p>
+      <% if (post.video) { %>
+        <video controls src="<%= post.video %>" width="300"></video>
+      <% } %>
+      <h3>Comments</h3>
+      <% post.comments.forEach(comment => { %>
+        <p><strong><%= comment.username %></strong>: <%= comment.text %></p>
+      <% }) %>
+    </div>
+  <% }) %>
+  <p><a href="/">Back</a></p>
+</body>
+</html>

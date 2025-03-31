@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Post</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav>
+    <div><h1>Social Video App</h1></div>
+    <div><p><a href="/">Home</a></p></div>
+  </nav>
+  <div class="container">
+    <h1>Create a Post</h1>
+    <form action="/post" method="POST" enctype="multipart/form-data">
+      <textarea name="content" placeholder="What's on your mind?" required></textarea><br>
+      <input type="file" name="video" accept="video/*"><br>
+      <button type="submit">Post</button>
+    </form>
+    <p><a href="/">Back</a></p>
+  </div>
+</body>
+</html>
