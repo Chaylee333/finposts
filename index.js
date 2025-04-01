@@ -1,44 +1,69 @@
 const express = require('express');
 const path = require('path');
-const fetch = require('node-fetch'); // Add this for API calls
+const fetch = require('node-fetch');
 const app = express();
 
 let posts = [
   { id: 0, username: "testuser", content: "This is a test post!", video: null, comments: [{ username: "testuser", text: "Cool post!" }] }
 ];
+let stocks = [];
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-// Alpha Vantage API key (replace with your own)
-const API_KEY = 'X4KI94CXTRUWDGHR'; // Get this from alphavantage.co
+const API_KEY = process.env.API_KEY || 'X4KI94CXTRUWDGHR'; // Use env var for Vercel, fallback for Replit
 
 app.get('/', (req, res) => {
-  res.render('index', { posts, user: null, searchResult: null });
+  try {
+    res.render('index', { posts, stocks, user: null });
+  } catch (error) {
+    console.error('Render error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.get('/search', async (req, res) => {
   const ticker = req.query.ticker.toUpperCase();
   try {
     const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${API_KEY}`);
+    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
     const data = await response.json();
-    const quote = data['Global Quote'];
-    let searchResult;
-    if (quote && quote['05. price']) {
-      searchResult = {
-        ticker,
-        price: quote['05. price'], // Current price
-        change: quote['10. change percent'] || 'N/A' // Percentage change
-      };
+    const quote = data['Global Quote'] || {};
+    const stockData = {
+      ticker,
+      price: quote['05. price'] || 'N/A',
+      change: quote['10. change percent'] || 'N/A',
+      comments: []
+    };
+    const existingStock = stocks.find(s => s.ticker === ticker);
+    if (!existingStock) {
+      stocks.push(stockData);
     } else {
-      searchResult = { ticker, price: 'N/A', change: 'N/A' };
+      existingStock.price = stockData.price;
+      existingStock.change = stockData.change;
     }
-    res.render('index', { posts, user: null, searchResult });
+    res.render('index', { posts, stocks, user: null });
   } catch (error) {
-    console.error('API Error:', error);
-    res.render('index', { posts, user: null, searchResult: { ticker, price: 'Error', change: 'N/A' } });
+    console.error('Search error:', error.message);
+    stocks.push({ ticker, price: 'Error', change: 'N/A', comments: [] });
+    res.render('index', { posts, stocks, user: null });
+  }
+});
+
+app.post('/stock-comment/:ticker', (req, res) => {
+  const ticker = req.params.ticker.toUpperCase();
+  const { comment } = req.body;
+  try {
+    const stock = stocks.find(s => s.ticker === ticker);
+    if (stock) {
+      stock.comments.push({ username: "testuser", text: comment });
+    }
+    res.redirect('/');
+  } catch (error) {
+    console.error('Stock comment error:', error);
+    res.status(500).send('Internal Server Error');
   }
 });
 
@@ -51,37 +76,62 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.render('login');
+  try {
+    res.render('login');
+  } catch (error) {
+    console.error('Login render error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.get('/signup', (req, res) => {
-  res.render('signup');
+  try {
+    res.render('signup');
+  } catch (error) {
+    console.error('Signup render error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.get('/post', (req, res) => {
-  res.render('post');
+  try {
+    res.render('post');
+  } catch (error) {
+    console.error('Post render error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.post('/post', (req, res) => {
   const { content } = req.body;
-  posts.push({
-    id: posts.length,
-    username: "testuser",
-    content,
-    video: null,
-    comments: []
-  });
-  res.redirect('/');
+  try {
+    posts.push({
+      id: posts.length,
+      username: "testuser",
+      content,
+      video: null,
+      comments: []
+    });
+    res.redirect('/');
+  } catch (error) {
+    console.error('Post error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.post('/comment/:postId', (req, res) => {
   const postId = parseInt(req.params.postId);
   const { comment } = req.body;
-  const post = posts.find(p => p.id === postId);
-  if (post) {
-    post.comments.push({ username: "testuser", text: comment });
+  try {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      post.comments.push({ username: "testuser", text: comment });
+    }
+    res.redirect('/');
+  } catch (error) {
+    console.error('Post comment error:', error);
+    res.status(500).send('Internal Server Error');
   }
-  res.redirect('/');
 });
 
 app.listen(process.env.PORT || 3000, () => console.log('Server running'));
