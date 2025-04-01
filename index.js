@@ -1,7 +1,5 @@
 const express = require('express');
 const session = require('express-session');
-const multer = require('multer');
-const path = require('path');
 const app = express();
 
 let users = [];
@@ -24,14 +22,7 @@ app.use(session({
 }));
 app.set('view engine', 'ejs');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'public/uploads'),
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
-});
-const upload = multer({ storage });
-
 app.get('/', (req, res) => {
-  console.log('Rendering homepage', { posts, user: req.session.user });
   res.render('index', { posts, user: req.session.user });
 });
 
@@ -43,8 +34,6 @@ app.get('/dashboard', (req, res) => {
   if (!req.session.user) return res.redirect('/login');
   res.send(`Dashboard for ${req.session.user}! <a href="/">Back</a>`);
 });
-
-// Existing routes (login, signup, post, etc.) remain unchanged...
 
 app.get('/login', (req, res) => {
   res.render('login');
@@ -87,15 +76,14 @@ app.get('/post', (req, res) => {
   res.render('post');
 });
 
-app.post('/post', upload.single('video'), (req, res) => {
+app.post('/post', (req, res) => {
   if (!req.session.user) return res.redirect('/login');
   const { content } = req.body;
-  const video = req.file ? `/uploads/${req.file.filename}` : null;
   posts.push({
     id: posts.length,
     username: req.session.user,
     content,
-    video,
+    video: null,
     comments: []
   });
   res.redirect('/');
@@ -117,4 +105,4 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
-app.listen(3000, () => console.log('Server running on port 3000'));
+app.listen(process.env.PORT || 3000, () => console.log('Server running'));
