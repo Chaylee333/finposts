@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fetch = require('node-fetch'); // Add this for API calls
 const app = express();
 
 let posts = [
@@ -11,12 +12,33 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// Alpha Vantage API key (replace with your own)
+const API_KEY = 'X4KI94CXTRUWDGHR'; // Get this from alphavantage.co
+
 app.get('/', (req, res) => {
+  res.render('index', { posts, user: null, searchResult: null });
+});
+
+app.get('/search', async (req, res) => {
+  const ticker = req.query.ticker.toUpperCase();
   try {
-    res.render('index', { posts, user: null });
+    const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${API_KEY}`);
+    const data = await response.json();
+    const quote = data['Global Quote'];
+    let searchResult;
+    if (quote && quote['05. price']) {
+      searchResult = {
+        ticker,
+        price: quote['05. price'], // Current price
+        change: quote['10. change percent'] || 'N/A' // Percentage change
+      };
+    } else {
+      searchResult = { ticker, price: 'N/A', change: 'N/A' };
+    }
+    res.render('index', { posts, user: null, searchResult });
   } catch (error) {
-    console.error('Render error:', error);
-    res.status(500).send('Internal Server Error');
+    console.error('API Error:', error);
+    res.render('index', { posts, user: null, searchResult: { ticker, price: 'Error', change: 'N/A' } });
   }
 });
 
