@@ -13,7 +13,7 @@ h1, h2, h3 {
 
 /* Top Menu Bar */
 .top-menu {
-  background-color: #fff;
+  background-color: #87CEFA; /* Light sky blue */
   border-bottom: 1px solid #dae0e6;
   padding: 10px 20px;
   display: flex;
